@@ -5,3 +5,6 @@ class bankAccount():
     
     def __str__(self):
         return f"Account owned by {self.accountHolder} with ${self.balance} in it"
+    
+    def accountInfo(self):
+        return str(self)
