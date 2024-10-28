@@ -8,3 +8,6 @@ class bankAccount():
     
     def accountInfo(self):
         return str(self)
+
+faruk_account = bankAccount("Faruk",5000)
+print(faruk_account.accountInfo())
