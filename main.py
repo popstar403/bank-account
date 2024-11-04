@@ -11,3 +11,6 @@ class bankAccount():
 
 faruk_account = bankAccount("Faruk",5000)
 print(faruk_account.accountInfo())
+
+polina_account = bankAccount("Polina",5000)
+print(polina_account.accountInfo())
