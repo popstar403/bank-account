@@ -8,3 +8,9 @@ class bankAccount():
     
     def accountInfo(self):
         return str(self)
+
+    def addInterest(self, percentage, isDecimal = False):
+        if(isDecimal):
+            self.balance *= 1 + (percentage)
+        else:
+            self.balance *= 1 + (percentage / 100)
