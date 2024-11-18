@@ -22,7 +22,8 @@ class bankAccount():
     def withdraw(self, withdrawlAmount):
         """
         Withdrawls an amount of money from a bank account
-        withdrawlAmount: Amount of money to be withdrawn. Must be between $0 and the account balance, or it returns an error"""
+        withdrawlAmount: Amount of money to be withdrawn. Must be between $0 and the account balance, or it returns an error
+        """
         if(0 <= withdrawlAmount <= self.balance):
             self.balance -= withdrawlAmount
         else:
@@ -30,6 +31,7 @@ class bankAccount():
 
 colin_account = bankAccount("Colin", 5000)
 print(colin_account.accountInfo())
+
 #No error
 colin_account.deposit(40)
 colin_account.withdraw(30)
