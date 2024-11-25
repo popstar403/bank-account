@@ -30,7 +30,7 @@ class bankAccount():
         return password.encode("utf-8")
 
     def encryptBalance(self, password, balance) -> None:
-        # generates 16 cryptographicaly safe random bytes for salting pin
+        # generates 16 cryptographicaly safe random bytes for salting password/pin
         self.passwordSalt = os.urandom(16)
 
         # derives key
