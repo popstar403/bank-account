@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import gc #Garbage collection
 
 class bankAccount():
-    reservedNames = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"]
+    reservedNames = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"] #Names people can't use
 
     def __init__(self, accountHolder: str, password, startingBalance = 0.0) -> None:
         if accountHolder in bankAccount.reservedNames:
