@@ -9,14 +9,11 @@ import gc #Garbage collection
 
 class bankAccount():
     reservedNames = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"]
-    nextId = 0
 
     def __init__(self, accountHolder: str, password, startingBalance = 0.0) -> None:
         if accountHolder in bankAccount.reservedNames:
             raise ValueError(f"Name {accountHolder} in reserved names list")
         self.accountHolder = accountHolder
-        self.accountID = bankAccount.nextId
-        bankAccount.nextId += 1
 
         self.encryptBalance(password, startingBalance)
     
