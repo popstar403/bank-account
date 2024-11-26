@@ -6,16 +6,17 @@ from cryptography.fernet import *
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import gc #Garbage collection
+import json #json
 
 class bankAccount():
     reservedNames = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"] #Names people can't use
 
-    def __init__(self, accountHolder: str, password, startingBalance = 0.0) -> None:
+    def __init__(self, accountHolder: str, password, startingBalance = 0.0, *, alreadyDefined: bool = False, passwordSalt: bytes = None) -> None:
         if accountHolder in bankAccount.reservedNames:
             raise ValueError(f"Name {accountHolder} in reserved names list")
         self.accountHolder = accountHolder
-
         self.encryptBalance(password, startingBalance)
+
     
     def __str__(self) -> str:
         return f"Account owned by {self.accountHolder}"
@@ -111,79 +112,43 @@ class bankAccount():
                 gc.collect() #garbage collect to rid memory of secrets when possible
                 return True
 
-bankAccounts = {
-    "alice": bankAccount("alice", "1000"),
-    "bob":   bankAccount("bob",   "1001"),
-    "john":  bankAccount("john",  "1002"),
-    "sam":   bankAccount("sam",   "1003"),
-}
+class existingBankAccount(bankAccount):
+    def __init__(self, accountHolder: str, encryptedBalance: bytes, passwordSalt: bytes) -> None:
+        self.accountHolder = accountHolder
+        self.encryptedBalance = encryptedBalance
+        self.passwordSalt = passwordSalt
 
-users = ["alice", "bob", "john", "sam"]
-exitList = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"]
 
-while True:
-    print("Choose a user, or exit")
-    for accountName in bankAccounts:
-        print(bankAccounts[accountName].accountHolder)
-    print("Or exit")
+class myEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bankAccount):
+            return {"accountHolder": obj.accountHolder, "encryptedBalance": obj.encryptedBalance, "passwordSalt": obj.passwordSalt}
+        if isinstance(obj, bytes):
+            return str(base64.b64encode(obj), encoding="utf-8")
+        else:
+            return super().default(obj)
 
-    inputString = input("Choice: ")
+class myDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, object_hook=self.object_hook, *args, **kwargs)
+    def object_hook(self, dictionary):
+        if "accountHolder" in dictionary:
+            return existingBankAccount(dictionary["accountHolder"], 
+                                       base64.b64decode(dictionary["encryptedBalance"]), 
+                                       base64.b64decode(dictionary["passwordSalt"]))
+        else:
+            return dictionary
 
-    if inputString in exitList:
-        break
+bankAccounts = [
+    bankAccount("bob", "hello world", 50)
+]
 
-    elif inputString in users:
-        activeAccount = bankAccounts[inputString]
+def dumpBankAccounts(accounts: list, file):
+    json.dump(accounts, file, cls=myEncoder)
 
-        while True:
-            print(f"What will you do? (account: {activeAccount.accountHolder})",
-                  "Deposit",
-                  "Withdraw",
-                  "Check balance",
-                  "Or exit",
-                  sep="\n")
-            
-            inputString = input("Choice: ").lower()
+def loadBankAccounts(file):
+    return json.load(file, cls=myDecoder)
 
-            if inputString in exitList:
-                break
-
-            elif inputString == "deposit":
-                try:
-                    depositAmount = int(input("Deposit amount: "))
-                    password = getpass.getpass("Passsword/Pin: ")
-                    couldDeposit = activeAccount.deposit(password, depositAmount)
-                    if couldDeposit:
-                        print("Deposited sucessfully")
-                    else:
-                        print("Could not deposit")
-                except Exception as exception:
-                    print(f"Exception: {exception}")
-                del password
-                del depositAmount
-                gc.collect() #garbage collect to rid memory of secrets when possible
-            
-            elif inputString == "withdraw":
-                try:
-                    withdrawAmount = int(input("Withdrawl amount: "))
-                    password = getpass.getpass("Passsword/Pin: ")
-                    couldWithdraw = activeAccount.withdraw(password, withdrawAmount)
-                    if couldWithdraw:
-                        print("Withdrawn sucessfully")
-                    else:
-                        print("Could not withdraw")
-                except Exception as exception:
-                    print(f"Exception: {exception}")
-                del password
-                del withdrawAmount
-                gc.collect() #garbage collect to rid memory of secrets when possible
-            
-            elif inputString == "check balance":
-                try:
-                    password = getpass.getpass("Passsword/Pin: ")
-                    print(f"Current Balance: ${activeAccount.decryptBalance(password)}")
-                except Exception as exception:
-                    print(f"Exception: {exception}")
-                del password
-                gc.collect() #garbage collect to rid memory of secrets when possible
-    
+jsonFile = open("accounts.json", "w")
+dumpBankAccounts(bankAccounts, jsonFile)
+jsonFile.close()
