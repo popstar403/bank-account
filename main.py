@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import gc #Garbage collection
 import json #json
-
+#sorry colin, I had to copy this because I lost my progress
 class bankAccount():
     reservedNames = ["exit", "Exit", "or exit", "Or exit", "or Exit", "Or Exit"] #Names people can't use
 
