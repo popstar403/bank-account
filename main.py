@@ -129,8 +129,8 @@ class myEncoder(json.JSONEncoder):
             return super().default(obj)
 
 class myDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, object_hook=self.object_hook, *args, **kwargs)
+    def __init__(self):
+        super().__init__(object_hook=self.object_hook)
     def object_hook(self, dictionary):
         if "accountHolder" in dictionary:
             return existingBankAccount(dictionary["accountHolder"], 
@@ -149,6 +149,12 @@ def dumpBankAccounts(accounts: list, file):
 def loadBankAccounts(file):
     return json.load(file, cls=myDecoder)
 
-jsonFile = open("accounts.json", "w")
+jsonFile = open("accounts.json", "w+")
 dumpBankAccounts(bankAccounts, jsonFile)
 jsonFile.close()
+
+jsonFile = open("accounts.json", "r+")
+loadedAccounts = loadBankAccounts(jsonFile)
+jsonFile.close()
+
+print(loadedAccounts[0].decryptBalance("hello world"))
